@@ -11,25 +11,25 @@ import org.junit.Test;
 public class DBConnTest {
 
     @Test
-    public void testConnectionWithDbTestProperties() throws Exception {
-        DBConnection dbConnection = new DBConnection("db_test.properties");
-        Connection connection = dbConnection.getConnection();
+    public void testConnexioAmbPropietatsDeTest() throws Exception {
+        DBConnection connexioBd = new DBConnection("db_test.properties");
+        Connection connexio = connexioBd.getConnexio();
 
-        assertNotNull(connection);
-        assertFalse(connection.isClosed());
+        assertNotNull(connexio);
+        assertFalse(connexio.isClosed());
 
-        connection.close();
+        connexio.close();
     }
 
     @Test
-    public void testConnectionWithWrongDriverProperties() {
+    public void testConnexioAmbDriverErroni() {
         try {
             new DBConnection("db_wrong_driver.properties");
             fail("S'esperava ClassNotFoundException amb db_wrong_driver.properties");
-        } catch (ClassNotFoundException ex) {
-            assertNotNull(ex);
-        } catch (IOException ex) {
-            fail("No s'esperava IOException: " + ex.getMessage());
+        } catch (ClassNotFoundException excepcio) {
+            assertNotNull(excepcio);
+        } catch (IOException excepcio) {
+            fail("No s'esperava IOException: " + excepcio.getMessage());
         }
     }
 }

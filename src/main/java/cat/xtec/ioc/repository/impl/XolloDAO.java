@@ -12,19 +12,25 @@ import java.util.List;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Implementació JDBC del repositori de xollos.
+ *
+ * Fa operacions CRUD sobre la taula "xollos" utilitzant sentències SQL
+ * preparades.
+ */
 @Repository
 @Primary
 public class XolloDAO implements XolloRepository {
 
-    private final DBConnection dbConnection;
+    private final DBConnection connexioBd;
 
     public XolloDAO() {
         this("db.properties");
     }
 
-    public XolloDAO(String connectionFile) {
+    public XolloDAO(String fitxerConnexio) {
         try {
-            this.dbConnection = new DBConnection(connectionFile);
+            this.connexioBd = new DBConnection(fitxerConnexio);
         } catch (ClassNotFoundException ex) {
             throw new IllegalStateException("No s'ha pogut carregar el driver JDBC.", ex);
         } catch (IOException ex) {
@@ -32,42 +38,48 @@ public class XolloDAO implements XolloRepository {
         }
     }
 
+    /**
+     * Insereix un nou xollo a la base de dades.
+     */
     @Override
     public void addXollo(Xollo xollo) {
-        String sql = "INSERT INTO xollos (codi, numeroUnitats, numeroReserves, titol, descripcio) VALUES (?, ?, ?, ?, ?)";
+        String sentenciaSql = "INSERT INTO xollos (codi, numeroUnitats, numeroReserves, titol, descripcio) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connexio = connexioBd.getConnexio();
+                PreparedStatement sentencia = connexio.prepareStatement(sentenciaSql)) {
 
             Integer numeroReserves = xollo.getNumeroReserves();
             if (numeroReserves == null) {
                 numeroReserves = 0;
             }
 
-            statement.setString(1, xollo.getCodi());
-            statement.setInt(2, xollo.getNumeroUnitats());
-            statement.setInt(3, numeroReserves);
-            statement.setString(4, xollo.getTitol());
-            statement.setString(5, xollo.getDescripcio());
-            statement.executeUpdate();
+            sentencia.setString(1, xollo.getCodi());
+            sentencia.setInt(2, xollo.getNumeroUnitats());
+            sentencia.setInt(3, numeroReserves);
+            sentencia.setString(4, xollo.getTitol());
+            sentencia.setString(5, xollo.getDescripcio());
+            sentencia.executeUpdate();
 
         } catch (SQLException ex) {
             throw new IllegalArgumentException("No s'ha pogut afegir el xollo amb codi: " + xollo.getCodi(), ex);
         }
     }
 
+    /**
+     * Recupera un xollo pel seu codi.
+     */
     @Override
     public Xollo getXolloByCodi(String codi) {
-        String sql = "SELECT codi, numeroUnitats, numeroReserves, titol, descripcio FROM xollos WHERE codi = ?";
+        String sentenciaSql = "SELECT codi, numeroUnitats, numeroReserves, titol, descripcio FROM xollos WHERE codi = ?";
 
-        try (Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connexio = connexioBd.getConnexio();
+                PreparedStatement sentencia = connexio.prepareStatement(sentenciaSql)) {
 
-            statement.setString(1, codi);
+            sentencia.setString(1, codi);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return mapResultSetToXollo(resultSet);
+            try (ResultSet resultat = sentencia.executeQuery()) {
+                if (resultat.next()) {
+                    return mapaResultatAXollo(resultat);
                 }
             }
 
@@ -78,21 +90,24 @@ public class XolloDAO implements XolloRepository {
         throw new IllegalArgumentException("No s'ha trobat el xollo amb el codi: " + codi);
     }
 
+    /**
+     * Actualitza un xollo existent per codi.
+     */
     @Override
     public void updateXollo(Xollo xollo) {
-        String sql = "UPDATE xollos SET numeroUnitats = ?, numeroReserves = ?, titol = ?, descripcio = ? WHERE codi = ?";
+        String sentenciaSql = "UPDATE xollos SET numeroUnitats = ?, numeroReserves = ?, titol = ?, descripcio = ? WHERE codi = ?";
 
-        try (Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connexio = connexioBd.getConnexio();
+                PreparedStatement sentencia = connexio.prepareStatement(sentenciaSql)) {
 
-            statement.setInt(1, xollo.getNumeroUnitats());
-            statement.setInt(2, xollo.getNumeroReserves());
-            statement.setString(3, xollo.getTitol());
-            statement.setString(4, xollo.getDescripcio());
-            statement.setString(5, xollo.getCodi());
+            sentencia.setInt(1, xollo.getNumeroUnitats());
+            sentencia.setInt(2, xollo.getNumeroReserves());
+            sentencia.setString(3, xollo.getTitol());
+            sentencia.setString(4, xollo.getDescripcio());
+            sentencia.setString(5, xollo.getCodi());
 
-            int rows = statement.executeUpdate();
-            if (rows == 0) {
+            int filesAfectades = sentencia.executeUpdate();
+            if (filesAfectades == 0) {
                 throw new IllegalArgumentException("No s'ha trobat el xollo amb el codi: " + xollo.getCodi());
             }
 
@@ -101,17 +116,20 @@ public class XolloDAO implements XolloRepository {
         }
     }
 
+    /**
+     * Retorna tots els xollos ordenats per codi.
+     */
     @Override
     public List<Xollo> getAllXollos() {
-        String sql = "SELECT codi, numeroUnitats, numeroReserves, titol, descripcio FROM xollos ORDER BY codi";
+        String sentenciaSql = "SELECT codi, numeroUnitats, numeroReserves, titol, descripcio FROM xollos ORDER BY codi";
         List<Xollo> xollos = new ArrayList<Xollo>();
 
-        try (Connection connection = dbConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()) {
+        try (Connection connexio = connexioBd.getConnexio();
+                PreparedStatement sentencia = connexio.prepareStatement(sentenciaSql);
+                ResultSet resultat = sentencia.executeQuery()) {
 
-            while (resultSet.next()) {
-                xollos.add(mapResultSetToXollo(resultSet));
+            while (resultat.next()) {
+                xollos.add(mapaResultatAXollo(resultat));
             }
 
             return xollos;
@@ -120,13 +138,16 @@ public class XolloDAO implements XolloRepository {
         }
     }
 
-    private Xollo mapResultSetToXollo(ResultSet resultSet) throws SQLException {
+    /**
+     * Converteix una fila del ResultSet a objecte de domini Xollo.
+     */
+    private Xollo mapaResultatAXollo(ResultSet resultat) throws SQLException {
         Xollo xollo = new Xollo();
-        xollo.setCodi(resultSet.getString("codi"));
-        xollo.setNumeroUnitats(resultSet.getInt("numeroUnitats"));
-        xollo.setNumeroReserves(resultSet.getInt("numeroReserves"));
-        xollo.setTitol(resultSet.getString("titol"));
-        xollo.setDescripcio(resultSet.getString("descripcio"));
+        xollo.setCodi(resultat.getString("codi"));
+        xollo.setNumeroUnitats(resultat.getInt("numeroUnitats"));
+        xollo.setNumeroReserves(resultat.getInt("numeroReserves"));
+        xollo.setTitol(resultat.getString("titol"));
+        xollo.setDescripcio(resultat.getString("descripcio"));
         return xollo;
     }
 }
