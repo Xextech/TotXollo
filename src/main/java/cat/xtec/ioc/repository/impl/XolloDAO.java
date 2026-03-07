@@ -1,7 +1,5 @@
 package cat.xtec.ioc.repository.impl;
 
-import cat.xtec.ioc.domain.Xollo;
-import cat.xtec.ioc.repository.XolloRepository;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,8 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
+
+import cat.xtec.ioc.domain.Xollo;
+import cat.xtec.ioc.repository.XolloRepository;
 
 /**
  * Implementació JDBC del repositori de xollos.
@@ -27,7 +29,7 @@ public class XolloDAO implements XolloRepository {
     public XolloDAO() {
         this("db.properties");
     }
-
+    /** Constructor que permet especificar un fitxer de connexió diferent, útil per a proves. */
     public XolloDAO(String fitxerConnexio) {
         try {
             this.connexioBd = new DBConnection(fitxerConnexio);
@@ -45,10 +47,11 @@ public class XolloDAO implements XolloRepository {
     public void addXollo(Xollo xollo) {
         String sentenciaSql = "INSERT INTO xollos (codi, numeroUnitats, numeroReserves, titol, descripcio) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connexio = connexioBd.getConnexio();
+        /** Utilitza try-with-resources per assegurar el tancament de connexions i sentències, i gestiona les excepcions SQL. */
+        try (Connection connexio = connexioBd.getConnexio();//
                 PreparedStatement sentencia = connexio.prepareStatement(sentenciaSql)) {
 
-            Integer numeroReserves = xollo.getNumeroReserves();
+            Integer numeroReserves = xollo.getNumeroReserves(); 
             if (numeroReserves == null) {
                 numeroReserves = 0;
             }
