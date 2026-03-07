@@ -8,9 +8,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Repository;
-
 import cat.xtec.ioc.domain.Xollo;
 import cat.xtec.ioc.repository.XolloRepository;
 
@@ -20,8 +17,6 @@ import cat.xtec.ioc.repository.XolloRepository;
  * Fa operacions CRUD sobre la taula "xollos" utilitzant sentències SQL
  * preparades.
  */
-@Repository
-@Primary
 public class XolloDAO implements XolloRepository {
 
     private final DBConnection connexioBd;
