@@ -17,6 +17,8 @@ import cat.xtec.ioc.repository.XolloRepository;
  * Fa operacions CRUD sobre la taula "xollos" utilitzant sentències SQL
  * preparades.
  */
+
+
 public class XolloDAO implements XolloRepository {
 
     private final DBConnection connexioBd;

@@ -7,6 +7,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import cat.xtec.ioc.domain.Xollo;
@@ -18,6 +19,7 @@ import cat.xtec.ioc.repository.XolloRepository;
  * Fa operacions CRUD sobre la taula "xollos" mitjançant JPQL i la unitat
  * de persistència "XollosPersistenceUnit".
  */
+@Primary
 @Repository
 public class XolloMySQL implements XolloRepository {
 
@@ -48,7 +50,17 @@ public class XolloMySQL implements XolloRepository {
     public void updateXollo(Xollo xollo) {
         EntityTransaction tx = entityManager.getTransaction();
         tx.begin();
-        entityManager.merge(xollo);
+        TypedQuery<Xollo> query = entityManager.createQuery(
+                "select object(o) from Xollo o where o.codi = :codi", Xollo.class);
+        query.setParameter("codi", xollo.getCodi());
+        List<Xollo> results = query.getResultList();
+        if (!results.isEmpty()) {
+            Xollo xolloPersistent = results.get(0);
+            xolloPersistent.setNumeroUnitats(xollo.getNumeroUnitats());
+            xolloPersistent.setNumeroReserves(xollo.getNumeroReserves());
+            xolloPersistent.setTitol(xollo.getTitol());
+            xolloPersistent.setDescripcio(xollo.getDescripcio());
+        }
         tx.commit();
     }
 
