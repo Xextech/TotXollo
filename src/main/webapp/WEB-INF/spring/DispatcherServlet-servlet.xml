@@ -13,7 +13,7 @@
 
     <mvc:annotation-driven enable-matrix-variables="true"/>
     <mvc:resources mapping="/img/**" location="/WEB-INF/img/" />
-    <context:component-scan base-package="cat.xtec.ioc.controller cat.xtec.ioc.repository cat.xtec.ioc.service" />
+    <context:component-scan base-package="cat.xtec.ioc.controller cat.xtec.ioc.repository cat.xtec.ioc.service cat.xtec.ioc.config" />
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/views/" />

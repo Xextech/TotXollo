@@ -8,7 +8,6 @@ import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
 import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Repository;
 
 import cat.xtec.ioc.domain.Xollo;
 import cat.xtec.ioc.repository.XolloRepository;
@@ -20,7 +19,6 @@ import cat.xtec.ioc.repository.XolloRepository;
  * de persistència "XollosPersistenceUnit".
  */
 @Primary
-@Repository
 public class XolloMySQL implements XolloRepository {
 
     private EntityManager entityManager;

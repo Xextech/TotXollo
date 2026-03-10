@@ -16,7 +16,6 @@ import java.util.Date;
  *
  * @author Germán Flores
  */
-@Repository
 public class InMemoryXolloRepository implements XolloRepository {
 
     private List<Xollo> llista = new ArrayList<Xollo>();
